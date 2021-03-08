@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/08/21 12:00:23
+Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/08/21 13:09:17
  Project6     (Proj6_meyersz.asm			     Page 1 - 1
 
 
@@ -136,8 +136,8 @@ Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/08/21 12:00:23
 				;
 				; Preconditions: mGetString must be defined for getting user input, user_num must be SDWORD
 				; Postconditions: converted string is stored as a SDWORD in user_num
-				; Receives: address of prompt1, address of user_str, MAXSIZE constant, address of num_bytes 
-				;			as parameters on the system stack
+				; Receives: addresses for... error_msg, user_num,prompt1, user_str, num_bytes... and
+				;			MAXSIZE constant as parameters on the system stack
 				; Returns: 
 				; ********************************
  00000031			ReadVal PROC
@@ -178,53 +178,58 @@ Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/08/21 12:00:23
 	   00000000
  0000006A  B8 00000000			MOV		EAX, 0				
  0000006F  BB 00000000			MOV		EBX, 0				; use EBX for running total
-
  00000074			_stringLoop:
  00000074  AC				LODSB
  00000075  3C 2D			CMP		AL, 2Dh			; if byte is "-", set local flag
- 00000077  74 2B			JE		_negative
+ 00000077  74 3F			JE		_negative
  00000079  3C 2B			CMP		AL, 2Bh			; if byte is "+", keep looping
- 0000007B  74 30			JE		_positive
+ 0000007B  74 44			JE		_positive
  0000007D  3C 30			CMP		AL, 30h
- 0000007F  7C 2E			JL		_error
+ 0000007F  7C 42			JL		_error
  00000081  3C 39			CMP		AL, 39h
- 00000083  7F 2A			JG		_error			; if current byte is not an ASCII hex representation of 0-9, error
+ 00000083  7F 3E			JG		_error			; if current byte is not an ASCII hex representation of 0-9, error
  00000085  2C 30			SUB		AL, 30h			; otherwise, valid, convert byte
-					
  00000087  50				PUSH	EAX				; save modified byte
  00000088  8B C3			MOV		EAX, EBX
  0000008A  BB 0000000A			MOV		EBX, 10
  0000008F  F7 E3			MUL		EBX				
  00000091  8B D8			MOV		EBX, EAX		; multiply running total by 10, store in EBX
  00000093  58				POP		EAX				; restore modified byte
-					
  00000094  03 D8			ADD		EBX, EAX		; running total * 10 +=  modified byte
  00000096  E2 DC			LOOP	_stringLoop
 					
-					; loop finished, convert if necessary, store
+					; loop finished, check for overflow, convert if necessary, store
  00000098  83 7D FC 01			CMP		negative, 1
- 0000009C  75 02			JNE		_storeNum
- 0000009E  F7 DB			NEG		EBX				; if local negative flag is set, negate EBX
- 000000A0			_storeNum:
- 000000A0  89 1F			MOV		[EDI], EBX		; store converted string in user_num
- 000000A2  EB 13			JMP		_end
- 000000A4			_negative:
- 000000A4  C7 45 FC			MOV		negative, 1		; set local negative flag
+ 0000009C  75 0C			JNE		_posOverflowCheck
+ 0000009E			_negOverflowCheck:
+ 0000009E  81 FB 80000000		CMP		EBX, 80000000h	
+ 000000A4  7F 1D			JG		_error			; error if negative overflow
+ 000000A6  F7 DB			NEG		EBX				; if local negative flag is set, negate EBX
+ 000000A8  EB 0A			JMP		_storeNum
+ 000000AA			_posOverflowCheck:
+ 000000AA  81 FB 7FFFFFFF		CMP		EBX, 7FFFFFFFh
+ 000000B0  7E 02			JLE		_storeNum
+ 000000B2  EB 0F			JMP		_error
+ 000000B4			_storeNum:
+ 000000B4  89 1F			MOV		[EDI], EBX		; store converted string in user_num
+ 000000B6  EB 13			JMP		_end
+ 000000B8			_negative:
+ 000000B8  C7 45 FC			MOV		negative, 1		; set local negative flag
 	   00000001
- 000000AB  E2 C7			LOOP	_stringLoop		; keep looping
- 000000AD			_positive:
- 000000AD  E2 C5			LOOP	_stringLoop		; do nothing keep looping
- 000000AF			_error:
- 000000AF  8B 55 1C			MOV		EDX, [EBP+28]	; error message in EDX
- 000000B2  E8 00000000 E		CALL	WriteString
- 000000B7			_end:
- 000000B7  61				POPAD
- 000000B8  C9		   *	    leave  
- 000000B9  C2 0018			RET 24
- 000000BC			ReadVal ENDP
+ 000000BF  E2 B3			LOOP	_stringLoop		; keep looping
+ 000000C1			_positive:
+ 000000C1  E2 B1			LOOP	_stringLoop		; do nothing keep looping
+ 000000C3			_error:
+ 000000C3  8B 55 1C			MOV		EDX, [EBP+28]	; error message in EDX
+ 000000C6  E8 00000000 E		CALL	WriteString
+ 000000CB			_end:
+ 000000CB  61				POPAD		; pop GP registers
+ 000000CC  C9		   *	    leave  
+ 000000CD  C2 0018			RET 24
+ 000000D0			ReadVal ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/08/21 12:00:23
+Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/08/21 13:09:17
  Project6     (Proj6_meyersz.asm			     Symbols 2 - 1
 
 
@@ -327,7 +332,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 0000008F Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000BC Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000D0 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -397,14 +402,16 @@ ReadInt  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 ReadKeyFlush . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 ReadKey  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 ReadString . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-ReadVal  . . . . . . . . . . . .	P Near	 00000031 _TEXT	Length= 0000008B Public STDCALL
+ReadVal  . . . . . . . . . . . .	P Near	 00000031 _TEXT	Length= 0000009F Public STDCALL
   negative . . . . . . . . . . .	DWord	 bp - 00000004
   _stringLoop  . . . . . . . . .	L Near	 00000074 _TEXT	
-  _storeNum  . . . . . . . . . .	L Near	 000000A0 _TEXT	
-  _negative  . . . . . . . . . .	L Near	 000000A4 _TEXT	
-  _positive  . . . . . . . . . .	L Near	 000000AD _TEXT	
-  _error . . . . . . . . . . . .	L Near	 000000AF _TEXT	
-  _end . . . . . . . . . . . . .	L Near	 000000B7 _TEXT	
+  _negOverflowCheck  . . . . . .	L Near	 0000009E _TEXT	
+  _posOverflowCheck  . . . . . .	L Near	 000000AA _TEXT	
+  _storeNum  . . . . . . . . . .	L Near	 000000B4 _TEXT	
+  _negative  . . . . . . . . . .	L Near	 000000B8 _TEXT	
+  _positive  . . . . . . . . . .	L Near	 000000C1 _TEXT	
+  _error . . . . . . . . . . . .	L Near	 000000C3 _TEXT	
+  _end . . . . . . . . . . . . .	L Near	 000000CB _TEXT	
 SetConsoleCursorInfo . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleCursorPosition . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleMode . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL

@@ -114,7 +114,6 @@ ReadVal PROC
 	MOV		negative, 0			; set local negative flag to 0
 	MOV		EAX, 0				
 	MOV		EBX, 0				; use EBX for running total
-
 _stringLoop:
 	LODSB
 	CMP		AL, 2Dh			; if byte is "-", set local flag
@@ -126,21 +125,30 @@ _stringLoop:
 	CMP		AL, 39h
 	JG		_error			; if current byte is not an ASCII hex representation of 0-9, error
 	SUB		AL, 30h			; otherwise, valid, convert byte
-	
 	PUSH	EAX				; save modified byte
 	MOV		EAX, EBX
 	MOV		EBX, 10
 	MUL		EBX				
 	MOV		EBX, EAX		; multiply running total by 10, store in EBX
 	POP		EAX				; restore modified byte
-	
 	ADD		EBX, EAX		; running total * 10 +=  modified byte
 	LOOP	_stringLoop
 	
-	; loop finished, convert if necessary, store
+
+	; NEED TO FIGURE OUT HOW TO CHECK FOR OVERFLOW
+
+	; loop finished, check for overflow, convert if necessary, store
 	CMP		negative, 1
-	JNE		_storeNum
+	JNE		_posOverflowCheck
+_negOverflowCheck:
+	CMP		EBX, 80000000h	
+	JG		_error			; error if negative overflow
 	NEG		EBX				; if local negative flag is set, negate EBX
+	JMP		_storeNum
+_posOverflowCheck:
+	CMP		EBX, 7FFFFFFFh
+	JLE		_storeNum
+	JMP		_error
 _storeNum:
 	MOV		[EDI], EBX		; store converted string in user_num
 	JMP		_end
@@ -153,7 +161,7 @@ _error:
 	MOV		EDX, [EBP+28]	; error message in EDX
 	CALL	WriteString
 _end:
-	POPAD
+	POPAD		; pop GP registers
 	RET 24
 ReadVal ENDP
 
