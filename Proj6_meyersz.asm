@@ -58,6 +58,7 @@ mDisplayString MACRO buffer_addr
 ENDM
 
 MAXSIZE = 33
+ARRAYSIZE = 10
 
 .data
 
@@ -66,21 +67,28 @@ MAXSIZE = 33
 	num_bytes	DWORD	?
 	error_msg	BYTE	"ERROR: you didn't enter a signed number, or your number was too big!",13,10,0
 	user_num	SDWORD	?
+	numArray	SDWORD	ARRAYSIZE DUP(?)
 
 .code
 main PROC
-	
+
+; fill the array of 10 integers in main
+	MOV		EDI, OFFSET numArray
+	MOV		ECX, LENGTHOF numArray
+_fillArray:
 	PUSH	OFFSET error_msg
 	PUSH	OFFSET user_num
 	PUSH	OFFSET prompt1
 	PUSH	OFFSET user_str
 	PUSH	MAXSIZE
 	PUSH	OFFSET num_bytes
-	CALL	ReadVal
-
-	; debugging
+	CALL	ReadVal				; prompts user, validates string input, converts to SDWORD
 	MOV		EAX, user_num
-	CALL	WriteInt
+	MOV		[EDI], EAX			; move user_num into array
+	ADD		EDI, TYPE numArray	; increment array address by type (go to next position)
+	LOOP	_fillArray
+
+; process the array with procedures
 
 	Invoke ExitProcess,0	; exit to operating system
 main ENDP
@@ -96,9 +104,11 @@ main ENDP
 ; Returns: 
 ; ********************************
 ReadVal PROC
-	LOCAL negative:DWORD	; setup local var negative to use as flag
-	PUSHAD					; push GP registers
+	; setup local vars: negative to use as flag, str_bytes to store num_bytes for later use
+	LOCAL negative:DWORD, str_bytes:DWORD	
+	PUSHAD									; push GP registers
 
+_getUserData:
 	; Get user's string, use macro with addresses and 
 	; identifiers from the stack frame:
 	;	[EBP+20] = offset prompt1
@@ -111,15 +121,30 @@ ReadVal PROC
 	MOV		EDI, [EBP+24]		; address of user_num in EDI
 	MOV		EAX, [EBP+8]		; address of num_bytes in EAX
 	MOV		ECX, [EAX]			; num_bytes in ECX (loop)
+	MOV		str_bytes, ECX
 	MOV		negative, 0			; set local negative flag to 0
 	MOV		EAX, 0				
 	MOV		EBX, 0				; use EBX for running total
+	
+	CLD		; clear direction flag
 _stringLoop:
 	LODSB
-	CMP		AL, 2Dh			; if byte is "-", set local flag
-	JE		_negative
-	CMP		AL, 2Bh			; if byte is "+", keep looping
-	JE		_positive
+	CMP		ECX, str_bytes
+	JE		_signCheck		; if first time through loop, check for a sign character
+	JMP		_charValidate
+	_signCheck:
+		CMP		AL, 2Dh			; if byte is "-", set local negative flag
+		JE		_negative
+		CMP		AL, 2Bh			; if byte is "+", clear local negative flag
+		JE		_positive
+		JMP		_charValidate	; if no sign, proceed to validation
+		_negative:
+			MOV		negative, 1		; set local negative flag
+			LOOP	_stringLoop		; keep looping
+		_positive:
+			MOV		negative, 0		; clear local negative flag
+			LOOP	_stringLoop		; keep looping
+_charValidate:
 	CMP		AL, 30h
 	JL		_error
 	CMP		AL, 39h
@@ -134,32 +159,25 @@ _stringLoop:
 	ADD		EBX, EAX		; running total * 10 +=  modified byte
 	LOOP	_stringLoop
 	
-
-	; NEED TO FIGURE OUT HOW TO CHECK FOR OVERFLOW
-
 	; loop finished, check for overflow, convert if necessary, store
 	CMP		negative, 1
-	JNE		_posOverflowCheck
-_negOverflowCheck:
-	CMP		EBX, 80000000h	
-	JG		_error			; error if negative overflow
-	NEG		EBX				; if local negative flag is set, negate EBX
-	JMP		_storeNum
-_posOverflowCheck:
-	CMP		EBX, 7FFFFFFFh
-	JLE		_storeNum
-	JMP		_error
+	JE		_negOverflowCheck
+	_posOverflowCheck:
+		CMP		EBX, 7FFFFFFFh	
+		JA		_error			; error if pos val > 2^31 - 1
+		JMP		_storeNum
+	_negOverflowCheck:
+		CMP		EBX, 80000000h	
+		JA		_error			; error if neg val < -(2^31)
+		NEG		EBX				; if local negative flag is set, negate EBX
+		JMP		_storeNum
 _storeNum:
 	MOV		[EDI], EBX		; store converted string in user_num
 	JMP		_end
-_negative:
-	MOV		negative, 1		; set local negative flag
-	LOOP	_stringLoop		; keep looping
-_positive:
-	LOOP	_stringLoop		; do nothing keep looping
 _error:
 	MOV		EDX, [EBP+28]	; error message in EDX
 	CALL	WriteString
+	JMP		_getUserData	; get new input (start all the way over)
 _end:
 	POPAD		; pop GP registers
 	RET 24
