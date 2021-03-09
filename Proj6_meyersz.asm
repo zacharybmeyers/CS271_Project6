@@ -62,17 +62,26 @@ ARRAYSIZE = 10
 
 .data
 
-	prompt1		BYTE	"Please enter a signed number: ",0
-	user_str	BYTE	MAXSIZE DUP(0)
-	num_bytes	DWORD	?
-	error_msg	BYTE	"ERROR: you didn't enter a signed number, or your number was too big!",13,10,0
-	user_num	SDWORD	?
-	numArray	SDWORD	ARRAYSIZE DUP(?)
+	prompt1			BYTE	"Please enter a signed number: ",0
+	user_str		BYTE	MAXSIZE DUP(?)
+	num_bytes		DWORD	?
+	error_msg		BYTE	"ERROR: you didn't enter a signed number, or your number was too big!",13,10,0
+	user_num		SDWORD	?
+	numArray		SDWORD	ARRAYSIZE DUP(?)
+	test_num		SDWORD	109
+	out_string		BYTE	MAXSIZE DUP(?)
+	array_prompt	BYTE	"You entered the following numbers:",13,10,0
 
 .code
 main PROC
+	
+; debugging for WriteVal
+;	PUSH	test_num
+;	PUSH	OFFSET out_string
+;	PUSH	LENGTHOF out_string
+;	CALL	WriteVal
 
-; fill the array of 10 integers in main
+; fill the array of 10 integers with ReadVal
 	MOV		EDI, OFFSET numArray
 	MOV		ECX, LENGTHOF numArray
 _fillArray:
@@ -88,7 +97,28 @@ _fillArray:
 	ADD		EDI, TYPE numArray	; increment array address by type (go to next position)
 	LOOP	_fillArray
 
-; process the array with procedures
+; display array prompt
+	CALL	CrLf
+	mDisplayString OFFSET array_prompt
+
+; display the array using WriteVal
+	MOV		ESI, OFFSET numArray
+	MOV		ECX, ARRAYSIZE
+_displayLoop:
+	PUSH	[ESI]				; push the current element to WriteVal
+	PUSH	OFFSET out_string
+	PUSH	LENGTHOF out_string
+	CALL	WriteVal			; display value as string
+	CMP		ECX, 1
+	JE		_noComma			; don't print a comma if last element
+	MOV		AL, 2Ch				; ","
+	CALL	WriteChar
+_noComma:	
+	MOV		AL, 20h	
+	CALL	WriteChar			; " "
+	ADD		ESI, TYPE numArray	; increment ESI to get next element
+	LOOP	_displayLoop
+	CALL	CrLf				; new line after displaying array
 
 	Invoke ExitProcess,0	; exit to operating system
 main ENDP
@@ -182,5 +212,61 @@ _end:
 	POPAD		; pop GP registers
 	RET 24
 ReadVal ENDP
+
+; ********************************
+; WriteVal: takes a signed integer value, converts it to a string, and displays it
+;
+; Preconditions: 
+; Postconditions: out_string contains ASCII char bytes after conversion
+; Receives: test_num, address of out_string, size of out_string as parameters on system stack
+; Returns: 
+; ********************************
+WriteVal PROC
+	LOCAL	negative:DWORD	; setup local var as negative flag
+	PUSHAD
+
+	MOV		negative, 0		; clear local negative flag
+	MOV		EDI, [EBP+12]	; address of out_string in EDI
+	ADD		EDI, [EBP+8]	; add length of out_string to EDI
+	DEC		EDI				; access last byte
+	MOV		AL, 0
+	STD						; move backwards through out_string
+	STOSB					; store null terminator
+
+	MOV		EAX, [EBP+16]	; num in EAX
+	MOV		EBX, 10			; divisor (10) in EBX
+	ADD		EAX, 0			; test sign flag
+	JNS		_convert		; if val in EAX is positive, jump to convert
+	; otherwise, set local negative flag and negate EAX, then convert
+	MOV		negative, 1		
+	NEG		EAX
+_convert:
+; keep dividing num, converting remainder, storing as byte
+_divisionLoop:
+	CDQ
+	IDIV	EBX				; divide quotient by 10
+	ADD		EDX, 30h		; convert remainder (last digit) to ASCII
+	PUSH	EAX				; preserve quotient
+	MOV		AL, DL			; store ASCII byte in AL
+	STOSB					; store in out_string
+	POP		EAX				; restore quotient
+	CMP		EAX, 0
+	JNE		_divisionLoop	; keep dividing/converting/storing bytes until quotient is 0
+	
+	; once loop ends, if negative flag was set, store "-" in EDI
+	CMP		negative, 1
+	JNE		_printStr		; if positive, print normal
+	MOV		AL, 2Dh			
+	STOSB					; if negative, store "-"
+
+_printStr:	
+	;increase EDI pointer once more to access first byte
+	INC		EDI
+	; use macro to display the converted num as a string
+	mDisplayString EDI
+
+	POPAD
+	RET	12
+WriteVal ENDP
 
 END main
