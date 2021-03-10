@@ -251,11 +251,16 @@ _charValidate:
 	CMP		AL, 39h
 	JG		_error			; if current byte is not an ASCII hex representation of 0-9, error
 	SUB		AL, 30h			; otherwise, valid, convert byte
+	
 	PUSH	EAX				; save modified byte
 	MOV		EAX, EBX
 	MOV		EBX, 10
 	MUL		EBX				
-	JC		_error			; if at any point the multiplication sets the carry flag, error
+	JNC		_finishLoop		; if multiplication doesn't cause a carry, finish loop
+	; otherwise, error
+	POP		EAX				; balance stack frame, jump to error
+	JMP		_error
+_finishLoop:
 	MOV		EBX, EAX		; multiply running total by 10, store in EBX
 	POP		EAX				; restore modified byte
 	ADD		EBX, EAX		; running total * 10 +=  modified byte
