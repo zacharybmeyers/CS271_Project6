@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/10/21 09:43:42
+Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/10/21 09:51:15
  Project6     (Proj6_meyersz.asm			     Page 1 - 1
 
 
@@ -134,17 +134,18 @@ Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/10/21 09:43:42
 	   69 74 20 72 65
 	   67 69 73 74 65
 	   72 2E 0D 0A
- 000000A9  4F 6E 63 65 20						BYTE	"Once finished I'll diplay your list of numbers, ",13,10
+ 000000A9  4F 6E 63 65 20						BYTE	"Once finished I'll display your list of numbers, ",13,10
 	   66 69 6E 69 73
 	   68 65 64 20 49
 	   27 6C 6C 20 64
-	   69 70 6C 61 79
-	   20 79 6F 75 72
-	   20 6C 69 73 74
-	   20 6F 66 20 6E
-	   75 6D 62 65 72
-	   73 2C 20 0D 0A
- 000000DB  61 6C 6F 6E 67						BYTE	"along with their sum and rounded average.",13,10,13,10,0
+	   69 73 70 6C 61
+	   79 20 79 6F 75
+	   72 20 6C 69 73
+	   74 20 6F 66 20
+	   6E 75 6D 62 65
+	   72 73 2C 20 0D
+	   0A
+ 000000DC  61 6C 6F 6E 67						BYTE	"along with their sum and rounded average.",13,10,13,10,0
 	   20 77 69 74 68
 	   20 74 68 65 69
 	   72 20 73 75 6D
@@ -154,18 +155,18 @@ Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/10/21 09:43:42
 	   65 72 61 67 65
 	   2E 0D 0A 0D 0A
 	   00
- 00000109 50 6C 65 61 73		prompt1			BYTE	"Please enter a signed number: ",0
+ 0000010A 50 6C 65 61 73		prompt1			BYTE	"Please enter a signed number: ",0
 	   65 20 65 6E 74
 	   65 72 20 61 20
 	   73 69 67 6E 65
 	   64 20 6E 75 6D
 	   62 65 72 3A 20
 	   00
- 00000128  00000021 [			user_str		BYTE	MAXSIZE DUP(?)
+ 00000129  00000021 [			user_str		BYTE	MAXSIZE DUP(?)
 	    00
 	   ]
- 00000149 00000000			num_bytes		DWORD	?
- 0000014D 45 52 52 4F 52		error_msg		BYTE	"ERROR: you didn't enter a signed number, or your number was too big!",13,10,0
+ 0000014A 00000000			num_bytes		DWORD	?
+ 0000014E 45 52 52 4F 52		error_msg		BYTE	"ERROR: you didn't enter a signed number, or your number was too big!",13,10,0
 	   3A 20 79 6F 75
 	   20 64 69 64 6E
 	   27 74 20 65 6E
@@ -180,15 +181,15 @@ Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/10/21 09:43:42
 	   74 6F 6F 20 62
 	   69 67 21 0D 0A
 	   00
- 00000194 00000000			user_num		SDWORD	?
- 00000198  0000000A [			numArray		SDWORD	ARRAYSIZE DUP(?)
+ 00000195 00000000			user_num		SDWORD	?
+ 00000199  0000000A [			numArray		SDWORD	ARRAYSIZE DUP(?)
 	    00000000
 	   ]
- 000001C0 0000006D			test_num		SDWORD	109
- 000001C4  00000021 [			out_string		BYTE	MAXSIZE DUP(?)
+ 000001C1 0000006D			test_num		SDWORD	109
+ 000001C5  00000021 [			out_string		BYTE	MAXSIZE DUP(?)
 	    00
 	   ]
- 000001E5 59 6F 75 20 65		array_prompt	BYTE	"You entered the following numbers:",13,10,0
+ 000001E6 59 6F 75 20 65		array_prompt	BYTE	"You entered the following numbers:",13,10,0
 	   6E 74 65 72 65
 	   64 20 74 68 65
 	   20 66 6F 6C 6C
@@ -196,23 +197,23 @@ Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/10/21 09:43:42
 	   20 6E 75 6D 62
 	   65 72 73 3A 0D
 	   0A 00
- 0000020A 54 68 65 20 73		sum_prompt		BYTE	"The sum of these numbers is: ",0
+ 0000020B 54 68 65 20 73		sum_prompt		BYTE	"The sum of these numbers is: ",0
 	   75 6D 20 6F 66
 	   20 74 68 65 73
 	   65 20 6E 75 6D
 	   62 65 72 73 20
 	   69 73 3A 20 00
- 00000228 54 68 65 20 72		avg_prompt		BYTE	"The rounded average (floor) is: ",0
+ 00000229 54 68 65 20 72		avg_prompt		BYTE	"The rounded average (floor) is: ",0
 	   6F 75 6E 64 65
 	   64 20 61 76 65
 	   72 61 67 65 20
 	   28 66 6C 6F 6F
 	   72 29 20 69 73
 	   3A 20 00
- 00000249 00000000			sum				SDWORD	0
- 0000024D 00000000			sum_negative	SDWORD	0	; use as flag for rounding later
- 00000251 00000000			average			SDWORD	?
- 00000255 54 68 61 6E 6B		goodbye			BYTE	"Thanks for playing, see ya!",13,10,0
+ 0000024A 00000000			sum				SDWORD	0
+ 0000024E 00000000			sum_negative	SDWORD	0	; use as flag for rounding later
+ 00000252 00000000			average			SDWORD	?
+ 00000256 54 68 61 6E 6B		goodbye			BYTE	"Thanks for playing, see ya!",13,10,0
 	   73 20 66 6F 72
 	   20 70 6C 61 79
 	   69 6E 67 2C 20
@@ -235,17 +236,17 @@ Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/10/21 09:43:42
  00000017  5A		     1		POP		EDX					; restore EDX
 
 				; fill the array with 10 integers using ReadVal
- 00000018  BF 00000198 R		MOV		EDI, OFFSET numArray
+ 00000018  BF 00000199 R		MOV		EDI, OFFSET numArray
  0000001D  B9 0000000A			MOV		ECX, LENGTHOF numArray
  00000022			_fillArray:
- 00000022  68 0000014D R		PUSH	OFFSET error_msg
- 00000027  68 00000194 R		PUSH	OFFSET user_num
- 0000002C  68 00000109 R		PUSH	OFFSET prompt1
- 00000031  68 00000128 R		PUSH	OFFSET user_str
+ 00000022  68 0000014E R		PUSH	OFFSET error_msg
+ 00000027  68 00000195 R		PUSH	OFFSET user_num
+ 0000002C  68 0000010A R		PUSH	OFFSET prompt1
+ 00000031  68 00000129 R		PUSH	OFFSET user_str
  00000036  6A 21			PUSH	MAXSIZE
- 00000038  68 00000149 R		PUSH	OFFSET num_bytes
+ 00000038  68 0000014A R		PUSH	OFFSET num_bytes
  0000003D  E8 000000F0			CALL	ReadVal				; prompts user, validates string input, converts to SDWORD
- 00000042  A1 00000194 R		MOV		EAX, user_num
+ 00000042  A1 00000195 R		MOV		EAX, user_num
  00000047  89 07			MOV		[EDI], EAX			; move user_num into array
  00000049  83 C7 04			ADD		EDI, TYPE numArray	; increment array address by type (go to next position)
  0000004C  E2 D4			LOOP	_fillArray
@@ -254,19 +255,19 @@ Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/10/21 09:43:42
  0000004E  E8 00000000 E		CALL	CrLf
 					mDisplayString OFFSET array_prompt
  00000053  52		     1		PUSH	EDX					; save EDX
- 00000054  BA 000001E5 R     1		MOV		EDX, OFFSET array_prompt
+ 00000054  BA 000001E6 R     1		MOV		EDX, OFFSET array_prompt
  00000059  E8 00000000 E     1		CALL	WriteString
  0000005E  5A		     1		POP		EDX					; restore EDX
 
 				; display the array using WriteVal, and accumulate the sum
- 0000005F  BE 00000198 R		MOV		ESI, OFFSET numArray
+ 0000005F  BE 00000199 R		MOV		ESI, OFFSET numArray
  00000064  B9 0000000A			MOV		ECX, ARRAYSIZE
  00000069			_displayLoop:
- 00000069  A1 00000249 R		MOV		EAX, sum			
+ 00000069  A1 0000024A R		MOV		EAX, sum			
  0000006E  03 06			ADD		EAX, [ESI]			
- 00000070  A3 00000249 R		MOV		sum, EAX			; acumulate each element in sum
+ 00000070  A3 0000024A R		MOV		sum, EAX			; acumulate each element in sum
  00000075  FF 36			PUSH	[ESI]				; push the current element to WriteVal
- 00000077  68 000001C4 R		PUSH	OFFSET out_string
+ 00000077  68 000001C5 R		PUSH	OFFSET out_string
  0000007C  6A 21			PUSH	LENGTHOF out_string
  0000007E  E8 0000016C			CALL	WriteVal			; display value as string
  00000083  83 F9 01			CMP		ECX, 1
@@ -283,48 +284,48 @@ Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/10/21 09:43:42
 				; use macro to diplay sum prompt, use WriteVal to display sum
 					mDisplayString OFFSET sum_prompt
  000000A0  52		     1		PUSH	EDX					; save EDX
- 000000A1  BA 0000020A R     1		MOV		EDX, OFFSET sum_prompt
+ 000000A1  BA 0000020B R     1		MOV		EDX, OFFSET sum_prompt
  000000A6  E8 00000000 E     1		CALL	WriteString
  000000AB  5A		     1		POP		EDX					; restore EDX
- 000000AC  FF 35 00000249 R		PUSH	sum
- 000000B2  68 000001C4 R		PUSH	OFFSET out_string
+ 000000AC  FF 35 0000024A R		PUSH	sum
+ 000000B2  68 000001C5 R		PUSH	OFFSET out_string
  000000B7  6A 21			PUSH	LENGTHOF out_string
  000000B9  E8 00000131			CALL	WriteVal
  000000BE  E8 00000000 E		CALL	CrLf
 
 				; determine if sum is positive or negative 
 				; (use for floor rounding the average later)
- 000000C3  A1 00000249 R		MOV		EAX, sum
+ 000000C3  A1 0000024A R		MOV		EAX, sum
  000000C8  83 C0 00			ADD		EAX, 0
  000000CB  78 02			JS		_setNegative
  000000CD  EB 0A			JMP		_calculateAvg
  000000CF			_setNegative:
- 000000CF  C7 05 0000024D R		MOV		sum_negative, 1
+ 000000CF  C7 05 0000024E R		MOV		sum_negative, 1
 	   00000001
 
 				; calculate rounded average
  000000D9			_calculateAvg:
- 000000D9  A1 00000249 R		MOV		EAX, sum
+ 000000D9  A1 0000024A R		MOV		EAX, sum
  000000DE  BB 0000000A			MOV		EBX, ARRAYSIZE
  000000E3  99				CDQ
  000000E4  F7 FB			IDIV	EBX
- 000000E6  83 3D 0000024D R		CMP		sum_negative, 1
+ 000000E6  83 3D 0000024E R		CMP		sum_negative, 1
 	   01
  000000ED  74 02			JE		_negativeRound		; if sum was negative, round average down
  000000EF  EB 01			JMP		_storeAvg
  000000F1			_negativeRound:
  000000F1  48				DEC		EAX
  000000F2			_storeAvg:
- 000000F2  A3 00000251 R		MOV		average, EAX	; sum / arraysize = average
+ 000000F2  A3 00000252 R		MOV		average, EAX	; sum / arraysize = average
 
 				; use macro to display average prompt, use WriteVal to display rounded average
 					mDisplayString OFFSET avg_prompt
  000000F7  52		     1		PUSH	EDX					; save EDX
- 000000F8  BA 00000228 R     1		MOV		EDX, OFFSET avg_prompt
+ 000000F8  BA 00000229 R     1		MOV		EDX, OFFSET avg_prompt
  000000FD  E8 00000000 E     1		CALL	WriteString
  00000102  5A		     1		POP		EDX					; restore EDX
- 00000103  FF 35 00000251 R		PUSH	average
- 00000109  68 000001C4 R		PUSH	OFFSET out_string
+ 00000103  FF 35 00000252 R		PUSH	average
+ 00000109  68 000001C5 R		PUSH	OFFSET out_string
  0000010E  6A 21			PUSH	LENGTHOF out_string
  00000110  E8 000000DA			CALL	WriteVal
  00000115  E8 00000000 E		CALL	CrLf
@@ -333,7 +334,7 @@ Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/10/21 09:43:42
  0000011A  E8 00000000 E		CALL	CrLf
 					mDisplayString OFFSET goodbye
  0000011F  52		     1		PUSH	EDX					; save EDX
- 00000120  BA 00000255 R     1		MOV		EDX, OFFSET goodbye
+ 00000120  BA 00000256 R     1		MOV		EDX, OFFSET goodbye
  00000125  E8 00000000 E     1		CALL	WriteString
  0000012A  5A		     1		POP		EDX					; restore EDX
 
@@ -527,7 +528,7 @@ Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/10/21 09:43:42
  00000246			WriteVal ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/10/21 09:43:42
+Microsoft (R) Macro Assembler Version 14.28.29335.0	    03/10/21 09:51:15
  Project6     (Proj6_meyersz.asm			     Symbols 2 - 1
 
 
@@ -629,7 +630,7 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000273 Para	  Public  'DATA'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000274 Para	  Public  'DATA'	
 _TEXT  . . . . . . . . . . . . .	32 Bit	 00000246 Para	  Public  'CODE'	
 
 
@@ -985,16 +986,16 @@ VK_UP  . . . . . . . . . . . . .	Number	 00000026h
 WINDOW_BUFFER_SIZE_EVENT . . . .	Number	 00000004h   
 WriteConsoleOutputCharacter  . .	Text   	 WriteConsoleOutputCharacterA
 WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
-array_prompt . . . . . . . . . .	Byte	 000001E5 _DATA	
-average  . . . . . . . . . . . .	DWord	 00000251 _DATA	
-avg_prompt . . . . . . . . . . .	Byte	 00000228 _DATA	
+array_prompt . . . . . . . . . .	Byte	 000001E6 _DATA	
+average  . . . . . . . . . . . .	DWord	 00000252 _DATA	
+avg_prompt . . . . . . . . . . .	Byte	 00000229 _DATA	
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
-error_msg  . . . . . . . . . . .	Byte	 0000014D _DATA	
+error_msg  . . . . . . . . . . .	Byte	 0000014E _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
-goodbye  . . . . . . . . . . . .	Byte	 00000255 _DATA	
+goodbye  . . . . . . . . . . . .	Byte	 00000256 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
 intro1 . . . . . . . . . . . . .	Byte	 00000000 _DATA	
@@ -1006,17 +1007,17 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-numArray . . . . . . . . . . . .	DWord	 00000198 _DATA	
-num_bytes  . . . . . . . . . . .	DWord	 00000149 _DATA	
-out_string . . . . . . . . . . .	Byte	 000001C4 _DATA	
-prompt1  . . . . . . . . . . . .	Byte	 00000109 _DATA	
+numArray . . . . . . . . . . . .	DWord	 00000199 _DATA	
+num_bytes  . . . . . . . . . . .	DWord	 0000014A _DATA	
+out_string . . . . . . . . . . .	Byte	 000001C5 _DATA	
+prompt1  . . . . . . . . . . . .	Byte	 0000010A _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-sum_negative . . . . . . . . . .	DWord	 0000024D _DATA	
-sum_prompt . . . . . . . . . . .	Byte	 0000020A _DATA	
-sum  . . . . . . . . . . . . . .	DWord	 00000249 _DATA	
-test_num . . . . . . . . . . . .	DWord	 000001C0 _DATA	
-user_num . . . . . . . . . . . .	DWord	 00000194 _DATA	
-user_str . . . . . . . . . . . .	Byte	 00000128 _DATA	
+sum_negative . . . . . . . . . .	DWord	 0000024E _DATA	
+sum_prompt . . . . . . . . . . .	Byte	 0000020B _DATA	
+sum  . . . . . . . . . . . . . .	DWord	 0000024A _DATA	
+test_num . . . . . . . . . . . .	DWord	 000001C1 _DATA	
+user_num . . . . . . . . . . . .	DWord	 00000195 _DATA	
+user_str . . . . . . . . . . . .	Byte	 00000129 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   

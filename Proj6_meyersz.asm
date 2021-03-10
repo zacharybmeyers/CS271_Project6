@@ -1,7 +1,7 @@
 TITLE Project6     (Proj6_meyersz.asm)
 
 ; Author: Zachary Meyers
-; Last Modified: 02021-03-09
+; Last Modified: 02021-03-10
 ; OSU email address: meyersz@oregonstate.edu
 ; Course number/section:   CS271 Section 400
 ; Project Number: 6                Due Date: 2021-03-14
@@ -17,7 +17,7 @@ TITLE Project6     (Proj6_meyersz.asm)
 ;				to print each converted value. 
 ;					Meanwhile, the sum is accumulated, then printed, and the rounded average is calculated based 
 ;				on the sum and the size of the array specified by a constant. Floor rounding is used for the average
-;				in case a decimal value is encountered. The program finisheds and says goodbye.
+;				in case a decimal value is encountered. The program finishes and says goodbye.
 ;  
 ; Implementation note: the program accounts for arrays of various sizes (using constants) and can validate 
 ;						any string as a signed integer to ensure it fits in a 32 bit register and is in 
@@ -81,7 +81,7 @@ ARRAYSIZE = 10
 	intro1			BYTE	"Project 6: Designing low level I/O procedures by Zachary Meyers",13,10,13,10,0
 	intro2			BYTE	"Please enter 10 signed decimal integers.",13,10
 					BYTE	"Each number must be able to fit inside a 32 bit register.",13,10
-					BYTE	"Once finished I'll diplay your list of numbers, ",13,10
+					BYTE	"Once finished I'll display your list of numbers, ",13,10
 					BYTE	"along with their sum and rounded average.",13,10,13,10,0
 	prompt1			BYTE	"Please enter a signed number: ",0
 	user_str		BYTE	MAXSIZE DUP(?)
