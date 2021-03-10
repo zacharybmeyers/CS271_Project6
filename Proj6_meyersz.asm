@@ -255,18 +255,19 @@ _charValidate:
 	MOV		EAX, EBX
 	MOV		EBX, 10
 	MUL		EBX				
+	JC		_error			; if at any point the multiplication sets the carry flag, error
 	MOV		EBX, EAX		; multiply running total by 10, store in EBX
 	POP		EAX				; restore modified byte
 	ADD		EBX, EAX		; running total * 10 +=  modified byte
 	LOOP	_stringLoop
 	
-	; loop finished, check for overflow, convert if necessary, store
+	; loop finished, check for "signed" overflow, convert if necessary, store
 	CMP		negative, 1
 	JE		_negOverflowCheck
 	_posOverflowCheck:
 		CMP		EBX, 7FFFFFFFh	
 		JA		_error			; error if pos val > 2^31 - 1
-		JMP		_storeNum
+		JMP		_storeNum			
 	_negOverflowCheck:
 		CMP		EBX, 80000000h	
 		JA		_error			; error if neg val < -(2^31)
