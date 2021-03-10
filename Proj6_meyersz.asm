@@ -1,11 +1,27 @@
 TITLE Project6     (Proj6_meyersz.asm)
 
 ; Author: Zachary Meyers
-; Last Modified: 02021-03-03
+; Last Modified: 02021-03-09
 ; OSU email address: meyersz@oregonstate.edu
 ; Course number/section:   CS271 Section 400
 ; Project Number: 6                Due Date: 2021-03-14
-; Description: ..............................
+; Description:		MASM program includes procedures for reading a string into a SDWORD (ReadVal) 
+;				and for reading a SDWORD into a string and displaying it (WriteVal). The main 
+;				function continually prompts for string input using ReadVal to fill an array of ARRAYSIZE 
+;				(constant) SDWORDs. 
+;					ReadVal makes use of a macro mGetString which uses the irvine library procedure ReadString 
+;				to get user input, then ReadVal validates that string input and converts it from a series 
+;				of bytes to a SDWORD, before finally storing it in an array. 
+;					WriteVal is used to convert each element in the array back to a string before printing 
+;				it with the use of a macro mDisplayString (which utilizes the irvine library procedure WriteString) 
+;				to print each converted value. 
+;					Meanwhile, the sum is accumulated, then printed, and the rounded average is calculated based 
+;				on the sum and the size of the array specified by a constant. Floor rounding is used for the average
+;				in case a decimal value is encountered. The program finisheds and says goodbye.
+;  
+; Implementation note: the program accounts for arrays of various sizes (using constants) and can validate 
+;						any string as a signed integer to ensure it fits in a 32 bit register and is in 
+;						integer representation (including a '+' or '-' as the first character)
 
 INCLUDE Irvine32.inc
 
@@ -62,6 +78,11 @@ ARRAYSIZE = 10
 
 .data
 
+	intro1			BYTE	"Project 6: Designing low level I/O procedures by Zachary Meyers",13,10,13,10,0
+	intro2			BYTE	"Please enter 10 signed decimal integers.",13,10
+					BYTE	"Each number must be able to fit inside a 32 bit register.",13,10
+					BYTE	"Once finished I'll diplay your list of numbers, ",13,10
+					BYTE	"along with their sum and rounded average.",13,10,13,10,0
 	prompt1			BYTE	"Please enter a signed number: ",0
 	user_str		BYTE	MAXSIZE DUP(?)
 	num_bytes		DWORD	?
@@ -71,17 +92,21 @@ ARRAYSIZE = 10
 	test_num		SDWORD	109
 	out_string		BYTE	MAXSIZE DUP(?)
 	array_prompt	BYTE	"You entered the following numbers:",13,10,0
+	sum_prompt		BYTE	"The sum of these numbers is: ",0
+	avg_prompt		BYTE	"The rounded average (floor) is: ",0
+	sum				SDWORD	0
+	sum_negative	SDWORD	0	; use as flag for rounding later
+	average			SDWORD	?
+	goodbye			BYTE	"Thanks for playing, see ya!",13,10,0
 
 .code
 main PROC
-	
-; debugging for WriteVal
-;	PUSH	test_num
-;	PUSH	OFFSET out_string
-;	PUSH	LENGTHOF out_string
-;	CALL	WriteVal
 
-; fill the array of 10 integers with ReadVal
+; introduction: use macro to print intro1 and intro 2
+	mDisplayString OFFSET intro1
+	mDisplayString OFFSET intro2
+
+; fill the array with 10 integers using ReadVal
 	MOV		EDI, OFFSET numArray
 	MOV		ECX, LENGTHOF numArray
 _fillArray:
@@ -97,14 +122,17 @@ _fillArray:
 	ADD		EDI, TYPE numArray	; increment array address by type (go to next position)
 	LOOP	_fillArray
 
-; display array prompt
+; use macro to display array prompt
 	CALL	CrLf
 	mDisplayString OFFSET array_prompt
 
-; display the array using WriteVal
+; display the array using WriteVal, and accumulate the sum
 	MOV		ESI, OFFSET numArray
 	MOV		ECX, ARRAYSIZE
 _displayLoop:
+	MOV		EAX, sum			
+	ADD		EAX, [ESI]			
+	MOV		sum, EAX			; acumulate each element in sum
 	PUSH	[ESI]				; push the current element to WriteVal
 	PUSH	OFFSET out_string
 	PUSH	LENGTHOF out_string
@@ -119,6 +147,49 @@ _noComma:
 	ADD		ESI, TYPE numArray	; increment ESI to get next element
 	LOOP	_displayLoop
 	CALL	CrLf				; new line after displaying array
+
+; use macro to diplay sum prompt, use WriteVal to display sum
+	mDisplayString OFFSET sum_prompt
+	PUSH	sum
+	PUSH	OFFSET out_string
+	PUSH	LENGTHOF out_string
+	CALL	WriteVal
+	CALL	CrLf
+
+; determine if sum is positive or negative 
+; (use for floor rounding the average later)
+	MOV		EAX, sum
+	ADD		EAX, 0
+	JS		_setNegative
+	JMP		_calculateAvg
+_setNegative:
+	MOV		sum_negative, 1
+
+; calculate rounded average
+_calculateAvg:
+	MOV		EAX, sum
+	MOV		EBX, ARRAYSIZE
+	CDQ
+	IDIV	EBX
+	CMP		sum_negative, 1
+	JE		_negativeRound		; if sum was negative, round average down
+	JMP		_storeAvg
+_negativeRound:
+	DEC		EAX
+_storeAvg:
+	MOV		average, EAX	; sum / arraysize = average
+
+; use macro to display average prompt, use WriteVal to display rounded average
+	mDisplayString OFFSET avg_prompt
+	PUSH	average
+	PUSH	OFFSET out_string
+	PUSH	LENGTHOF out_string
+	CALL	WriteVal
+	CALL	CrLf
+
+; use macro to display farewell message
+	CALL	CrLf
+	mDisplayString OFFSET goodbye
 
 	Invoke ExitProcess,0	; exit to operating system
 main ENDP
@@ -218,7 +289,7 @@ ReadVal ENDP
 ;
 ; Preconditions: 
 ; Postconditions: out_string contains ASCII char bytes after conversion
-; Receives: test_num, address of out_string, size of out_string as parameters on system stack
+; Receives: user_num, address of out_string, size of out_string as parameters on system stack
 ; Returns: 
 ; ********************************
 WriteVal PROC
