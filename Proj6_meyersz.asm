@@ -92,6 +92,8 @@ ARRAYSIZE = 10
 	test_num		SDWORD	109
 	out_string		BYTE	MAXSIZE DUP(?)
 	array_prompt	BYTE	"You entered the following numbers:",13,10,0
+	comma			BYTE	",",0
+	space			BYTE	" ",0
 	sum_prompt		BYTE	"The sum of these numbers is: ",0
 	avg_prompt		BYTE	"The rounded average (floor) is: ",0
 	sum				SDWORD	0
@@ -139,11 +141,9 @@ _displayLoop:
 	CALL	WriteVal			; display value as string
 	CMP		ECX, 1
 	JE		_noComma			; don't print a comma if last element
-	MOV		AL, 2Ch				; ","
-	CALL	WriteChar
+	mDisplayString OFFSET comma	; ","
 _noComma:	
-	MOV		AL, 20h	
-	CALL	WriteChar			; " "
+	mDisplayString OFFSET space ; " "
 	ADD		ESI, TYPE numArray	; increment ESI to get next element
 	LOOP	_displayLoop
 	CALL	CrLf				; new line after displaying array
